@@ -1,4 +1,4 @@
-﻿#
+#
 # This file is a command-module for Dragonfly.
 # (c) Copyright 2008 by Christo Butcher
 # Licensed under the LGPL, see <http://www.gnu.org/licenses/>
@@ -10,7 +10,7 @@ Command-module loader for WSR
 
 This script can be used to look Dragonfly command-modules 
 for use with Window Speech Recognition.  It scans the 
-directory it's in and loads any ``*.py`` it finds.
+directory it's in and loads any ``_*.py`` it finds.
 
 """
 
