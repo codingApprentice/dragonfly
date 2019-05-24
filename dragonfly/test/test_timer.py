@@ -23,6 +23,7 @@ import unittest
 import time
 import logging
 from dragonfly.engines import get_engine
+from dragonfly.engines.base.timer import ThreadedTimerManager
 
 
 #===========================================================================
@@ -40,6 +41,23 @@ class CapturingHandler(logging.Handler):
 #===========================================================================
 
 class TestTimer(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        # If the engine's timer manager is a ThreadedTimerManager, disable
+        # the main callback to prevent race conditions.
+        timer_manager = get_engine()._timer_manager
+        if isinstance(timer_manager, ThreadedTimerManager):
+            cls.threaded_timer_manager = timer_manager
+            timer_manager.disable()
+        else:
+            cls.threaded_timer_manager = None
+
+    @classmethod
+    def tearDownClass(cls):
+        # Re-enable the timer manager's callback if necessary.
+        if cls.threaded_timer_manager:
+            cls.threaded_timer_manager.enable()
 
     def setUp(self):
         self.log_capture = CapturingHandler()
@@ -70,6 +88,27 @@ class TestTimer(unittest.TestCase):
             self.assertTrue(len(self.log_capture.records) >= 1)
             log_message = self.log_capture.records[0].msg
             self.assertTrue("Exception from timer callback" in log_message)
+        finally:
+            # Stop the timer at the end regardless of the result.
+            timer.stop()
+
+    def test_non_repeating_timers(self):
+        """ Test that non-repeating timers only run once. """
+
+        callback_called = [0]
+        def callback():
+            callback_called[0] += 1
+
+        interval = 0.01
+        timer = self.engine.create_timer(callback, interval, False)
+        time.sleep(0.02)
+        timer.manager.main_callback()
+        time.sleep(0.02)
+        timer.manager.main_callback()
+
+        # Callback was only called once.
+        try:
+            self.assertEqual(callback_called[0], 1)
         finally:
             # Stop the timer at the end regardless of the result.
             timer.stop()
