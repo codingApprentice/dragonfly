@@ -77,10 +77,15 @@ setup(
 
       extras_require={
           "sphinx": [
-                     "sphinxwrapper >= 1.1.1",
-                     "pyjsgf >= 1.2.2",
+                     "sphinxwrapper >= 1.2.0",
+                     "pyjsgf >= 1.7.0",
                      "pyaudio"
-                    ]
+                    ],
+          "kaldi": [
+                    "kaldi-active-grammar == 0.4.0",
+                    "pyaudio == 0.2.*",
+                    "webrtcvad ~= 2.0",
+                   ],
       },
 
       classifiers=[
