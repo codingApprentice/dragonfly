@@ -37,6 +37,113 @@ string methods on the :class:`Dictation` object.
 A tuple of the raw  spoken words can be
 retrieved using :attr:`~DictationContainerBase.words`.
 
+
+String Formatting Examples
+----------------------------------------------------------------------------
+
+The following examples demonstrate dictation input can be formatted by
+calling string methods on :class:`Dictation` elements.
+
+Python example:
+
+..  code:: python
+
+    mapping = {
+        # Define commands for writing Python methods, functions and classes.
+        "method [<under>] <snaketext>":
+            Text("def %(under)s%(snaketext)s(self):") + Key("left:2"),
+        "function <snaketext>":
+            Text("def %(snaketext)s():") + Key("left:2"),
+        "classy [<classtext>]":
+            Text("class %(classtext)s:") + Key("left"),
+
+        # Define a command for accessing object members.
+        "selfie [<under>] [<snaketext>]":
+            Text("self.%(under)s%(snaketext)s"),
+    }
+
+    extras = [
+        # Define a Dictation element that produces snake case text,
+        # e.g. hello_world.
+        Dictation("snaketext", default="").lower().replace(" ", "_"),
+
+        # Define a Dictation element that produces text matching Python's
+        # class casing, e.g. DictationContainer.
+        Dictation("classtext", default="").title().replace(" ", ""),
+
+        # Allow adding underscores before cased text.
+        Choice("under", {"under": "_"}, default=""),
+    ]
+
+    rule = MappingRule(name="PythonExample", mapping=mapping, extras=extras)
+
+
+Markdown example:
+
+..  code:: python
+
+    mapping = {
+        # Define a command for typing Markdown headings 1 to 7 with optional
+        # capitalized text.
+        "heading [<num>] [<capitalised_text>]":
+            Text("#")*Repeat("num") + Text(" %(capitalised_text)s"),
+    }
+
+    extras = [
+        Dictation("capitalised_text", default="").capitalize(),
+        IntegerRef("num", 1, 7, 1),
+    ]
+
+    rule = MappingRule(name="MdExample", mapping=mapping, extras=extras)
+
+
+Camel-case example using the :meth:`Dictation.camel` method:
+
+..  code:: python
+
+    mapping = {
+        # Define a command for typing camel-case text, e.g. helloWorld.
+        "camel <camel_text>": Text(" %(camel_text)s"),
+    }
+
+    extras = [
+        Dictation("camel_text", default="").camel(),
+    ]
+
+    rule = MappingRule(name="CamelExample", mapping=mapping, extras=extras)
+
+
+Example using the :meth:`Dictation.apply` method for random casing:
+
+..  code:: python
+
+    from random import random
+
+    def random_text(text):
+        # Randomize the case of each character.
+        result = ""
+        for c in text:
+            r = random()
+            if r < 0.5:
+                result += c.lower()
+            else:
+                result += c.upper()
+        return result
+
+    mapping = {
+        "random <random_text>": Text("%(random_text)s"),
+    }
+
+    extras = [
+        Dictation("random_text", default="").apply(random_text),
+    ]
+
+    rule = MappingRule(name="RandomExample", mapping=mapping, extras=extras)
+
+
+Class reference
+----------------------------------------------------------------------------
+
 """
 
 
@@ -134,24 +241,32 @@ class DictationContainerBase(object):
 
     def apply_methods(self, joined_words):
         """
-        Apply any string methods called on the :class:`Dictation` object to a given string. Called during :meth:`format`.
+        Apply any string methods called on the :class:`Dictation` object to
+        a given string.
+
+        Called during :meth:`format`.
         """
         result = joined_words
         if result: # Do nothing for empty string
             for method in self._methods:
                 if hasattr(result, method[0]):
-                    result = getattr(result, method[0])(*method[1], **method[2])
+                    function = getattr(result, method[0])
+                    result = function(*method[1], **method[2])
                 elif hasattr(self, method[0]):
-                    result = getattr(self, method[0])(result, *method[1], **method[2])
+                    function = getattr(self, method[0])
+                    result = function(result, *method[1], **method[2])
                 else:
-                    raise AttributeError("'%s' is not a valid dictation or string method" % method[0])
+                    raise AttributeError("'%s' is not a valid dictation or "
+                                         "string method" % method[0])
         return result
 
     def apply(self, str_input, format_func):
         if callable(format_func):
             return format_func(str_input)
         else:
-            raise TypeError("Argument passed to 'Dictation.apply' method must be callable, taking and returning a string.")
+            raise TypeError("Argument passed to 'Dictation.apply' method "
+                            "must be callable, taking and returning a "
+                            "string.")
 
     def camel(self, str_input):
         def f(s):

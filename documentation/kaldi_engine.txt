@@ -39,6 +39,13 @@ affiliated with the dragonfly project itself).
 Setup
 ----------------------------------------------------------------------------
 
+Want to get started **quickly & easily on Windows**? A self-contained,
+portable, batteries-included (python & libraries & model) distribution
+of kaldi-active-grammar + dragonfly2 is available at the
+`kaldi-active-grammar project releases page
+<https://github.com/daanzu/kaldi-active-grammar/releases>`_.
+Otherwise...
+
 **Requirements:**
 
 * Python 2.7 (3.x support planned); *64-bit required!*
@@ -75,7 +82,7 @@ by executing ``pip install --upgrade pip``.
 
 You will also need a **model** to use. You can download a `compatible
 general English Kaldi nnet3 chain model
-<https://github.com/daanzu/kaldi-active-grammar/releases/tag/v0.4.0>`_
+<https://github.com/daanzu/kaldi-active-grammar/releases>`_
 from `kaldi-active-grammar
 <https://github.com/daanzu/kaldi-active-grammar>`_. Unzip it into a
 directory within the directory containing your grammar modules.
