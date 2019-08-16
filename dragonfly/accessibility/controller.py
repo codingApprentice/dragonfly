@@ -1,5 +1,3 @@
-from six import text_type
-
 from dragonfly import (
     Key,
     Mouse,
@@ -60,12 +58,13 @@ class AccessibilityController(object):
         if self.select_text(text_query):
             # Replace text.
             if replacement:
-                replacement = text_type(replacement).lower()
+                replacement = str(replacement).lower()
                 if text_info.text and text_info.text.isupper():
                     replacement = replacement.upper()
                 elif text_info.text and text_info.text[0].isupper():
                     replacement = replacement.capitalize()
-                Text(replacement.replace("%", "%%")).execute()
+                # TODO Add escaping.
+                Text(replacement).execute()
             else:
                 # Delete the selected text with a single backspace. Note that
                 # the user may want to delete the preceding whitespace as well,

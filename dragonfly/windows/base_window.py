@@ -24,8 +24,7 @@ Base Window class
 
 """
 
-from six import string_types, integer_types, binary_type
-from locale import getpreferredencoding
+from six import string_types, integer_types
 
 from .window_movers import window_movers
 
@@ -171,12 +170,7 @@ class BaseWindow(object):
     @property
     def title(self):
         """ Read-only access to the window's title. """
-        window_text = self._get_window_text()
-        # PY2
-        if isinstance(window_text, binary_type):
-            return window_text.decode(getpreferredencoding())
-        else:
-            return window_text
+        return self._get_window_text()
 
     @property
     def classname(self):
@@ -241,10 +235,6 @@ class BaseWindow(object):
 
     def maximize(self):
         """ Maximize the window (if possible). """
-        raise NotImplementedError()
-
-    def close(self):
-        """ Close the window (if possible). """
         raise NotImplementedError()
 
     def restore(self):
